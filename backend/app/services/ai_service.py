@@ -1,8 +1,11 @@
-
 import json
+import logging
+import httpx
 from ollama import AsyncClient
+from app.config import DEFAULT_MODEL, OLLAMA_BASE_URL, OLLAMA_TIMEOUT
 
-MODEL_NAME = "gemma4:e2b"
+logger = logging.getLogger("open_business_ai.ai_service")
+MODEL_NAME = DEFAULT_MODEL
 
 
 SYSTEM_PROMPT = """
@@ -76,7 +79,7 @@ async def generate_business_reply(
     messages.append({"role": "user", "content": customer_message})
 
     try:
-        client = AsyncClient()
+        client = AsyncClient(host=OLLAMA_BASE_URL, timeout=OLLAMA_TIMEOUT)
 
         response = await client.chat(
             model=MODEL_NAME,
@@ -110,12 +113,29 @@ async def generate_business_reply(
             "escalation_reason": escalation_reason,
         }
 
-    except Exception as error:
-        print(f"AI service error: {error}")
+    except (ConnectionError, httpx.ConnectError, httpx.ConnectTimeout) as conn_err:
+        logger.warning("Ollama connection failed: %s", conn_err)
+        return {
+            "reply": "I'm sorry, our AI reply assistant is currently offline. A team member has been notified and will assist you shortly.",
+            "status": "escalated",
+            "business_id": business_id,
+            "escalation_reason": "AI inference engine unreachable (Ollama service offline).",
+        }
 
+    except httpx.TimeoutException as timeout_err:
+        logger.warning("Ollama request timed out: %s", timeout_err)
+        return {
+            "reply": "I'm sorry, the response took longer than expected. A team member will assist you shortly.",
+            "status": "escalated",
+            "business_id": business_id,
+            "escalation_reason": "AI inference timed out.",
+        }
+
+    except Exception as error:
+        logger.error("AI service error: %s", error, exc_info=True)
         return {
             "reply": "I'm sorry, I'm unable to assist with this request right now. A team member will help you shortly.",
             "status": "escalated",
             "business_id": business_id,
-            "escalation_reason": "AI service error or invalid model response.",
+            "escalation_reason": f"AI service error: {type(error).__name__}",
         }

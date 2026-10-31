@@ -210,6 +210,31 @@ def test_pack_loader_unit():
             test_target_file.unlink()
 
 
+def test_ai_service_unit():
+    """Verify AI service functions and escalation behaviors."""
+    print("\nTesting AI Service Integration...")
+    import asyncio
+    from app.services.ai_service import MODEL_NAME, generate_business_reply
+    from app.config import DEFAULT_MODEL
+
+    # Verify model configuration alignment
+    assert MODEL_NAME == DEFAULT_MODEL
+    print(f"  [OK] Model Name correctly sourced from central config: {MODEL_NAME}")
+
+    # Verify escalation when pack_context is empty
+    empty_result = asyncio.run(
+        generate_business_reply(
+            business_id="sweet-home-kitchen",
+            customer_message="What are your hours?",
+            conversation_history=[],
+            pack_context={},
+        )
+    )
+    assert empty_result["status"] == "escalated"
+    assert "empty" in empty_result["escalation_reason"].lower()
+    print("  [OK] Empty knowledge pack triggers immediate escalation without guessing")
+
+
 def test_api_endpoints():
     """Verify FastAPI routes using TestClient."""
     print("\nTesting API Endpoints...")
@@ -305,6 +330,7 @@ if __name__ == "__main__":
     test_pydantic_schemas_valid()
     test_pydantic_schemas_invalid()
     test_pack_loader_unit()
+    test_ai_service_unit()
     test_api_endpoints()
     test_cors()
     print("\n=== ALL BACKEND CHECKS PASSED SUCCESSFULLY ===")
