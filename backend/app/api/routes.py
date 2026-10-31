@@ -9,6 +9,7 @@ from app.api.schemas import (
     ChatResponse,
     UpdateFileRequest,
 )
+from app.services.ai_service import generate_business_reply
 from app.services.pack_loader import (
     BusinessNotFoundError,
     InvalidBusinessIdError,
@@ -80,27 +81,38 @@ async def get_business_pack_endpoint(business_id: str) -> BusinessPackResponse:
     tags=["Chat"],
 )
 async def chat_endpoint(request: ChatRequest) -> ChatResponse:
-    """Receive customer query, validate request, and return assistant reply.
-
-    Note: The full open-weight AI model generation will be plugged in via
-    ai_service.py by Member 3.
-    """
-    # Verify that the business pack exists
+    """Receive customer query, validate business pack, and generate AI response."""
+    # Verify business pack exists and load its Markdown knowledge files
     try:
-        load_business_pack(request.business_id)
-    except (InvalidBusinessIdError, BusinessNotFoundError) as exc:
+        pack_context = load_business_pack(request.business_id)
+    except InvalidBusinessIdError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except BusinessNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Business pack '{request.business_id}' not found.",
         )
+    except PackFileIOError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
 
-    # Scaffold response conforming strictly to ChatResponse schema
-    return ChatResponse(
-        reply=f"Hello! I am the AI assistant for {request.business_id}. Member 3's AI inference engine is connecting...",
-        status="success",
+    # Convert conversation history objects to list of dicts expected by ai_service
+    history = [msg.model_dump() for msg in request.conversation_history]
+
+    # Generate grounded AI reply using Member 3's AI service
+    ai_result = await generate_business_reply(
         business_id=request.business_id,
-        escalation_reason=None,
+        customer_message=request.message,
+        conversation_history=history,
+        pack_context=pack_context,
     )
+
+    return ChatResponse(**ai_result)
 
 
 @router.put(

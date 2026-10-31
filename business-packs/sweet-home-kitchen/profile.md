@@ -1,20 +1,38 @@
-# Sweet Home Kitchen — Business Profile
+# Sweet Home Kitchen
 
-## Business identity
-- Business name: Sweet Home Kitchen
-- Business type: Bakery / food business
-- Description: A demo bakery business used to demonstrate the Open Business AI assistant.
-- Location: Not configured.
-- Contact details: Not configured.
-- Business hours: Not configured.
+**Category:** Bakery & Confectionery  
+**Description:** Artisanal neighbourhood bakery specializing in handcrafted celebration cakes, sourdough breads, and morning pastries.
 
-## Assistant responsibilities
-- Answer questions using the configured menu and FAQs.
-- Help customers understand the ordering process.
-- Collect details needed for an order.
-- Escalate questions about unavailable information.
+---
 
-## Important restrictions
-- Never invent products, ingredients, prices, delivery areas, or availability.
-- Do not confirm an order or payment.
-- Refer allergy, dietary, complaint, refund, and custom-cake requests to a human.
+**Business Identity**
+- **Store Address:** 42 Maple Street, Downtown Crossing, Springfield
+- **Phone:** (555) 234-5678
+- **Email:** orders@sweethomekitchen.demo
+- **Business Hours:**
+  - Tuesday – Saturday: 8:00 AM – 6:00 PM
+  - Sunday: 9:00 AM – 3:00 PM
+  - Monday: Closed (Kitchen sanitization and prep)
+
+---
+
+**Service Area & Delivery**
+- **In-Store Pickup:** Free during standard operating hours at 42 Maple Street.
+- **Local Delivery Area:** Available within a 5-mile radius from 42 Maple Street.
+- **Delivery Fee:** Flat $5.00 delivery fee; complimentary on orders exceeding $50.00.
+- **Delivery Windows:**
+  - Tuesday – Saturday: 11:00 AM – 5:00 PM
+  - Sunday: 10:00 AM – 2:30 PM (delivery ends before the store closes at 3:00 PM)
+
+---
+
+**Assistant Responsibilities**
+- Answer customer questions regarding menu items, prices, ingredients, and operating hours.
+- Explain ordering lead times, delivery guidelines, and pickup windows.
+- Collect customer order details (name, phone, item, size, pickup/delivery date and time window).
+- Clarify that all orders and payments are confirmed by human bakery staff, never by the AI.
+
+---
+
+**Escalation Rules**
+- Escalate severe allergy warnings, custom multi-tier wedding cakes, cancellation requests, refund requests, payment disputes, and corporate catering over 50 servings to bakery staff.
