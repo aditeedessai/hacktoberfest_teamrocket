@@ -330,3 +330,32 @@ def update_business_pack_file(business_id: str, filename: str, content: str) -> 
         raise PackFileIOError(
             f"Failed to write file '{clean_filename}' in '{business_id}': {err}"
         ) from err
+
+
+def create_business_pack(
+    business_id: str,
+    files: Dict[str, str],
+) -> bool:
+    """Create a new business pack directory and write its initial Markdown files.
+
+    Args:
+        business_id: Validated business identifier.
+        files: Dictionary mapping filename to Markdown content.
+
+    Returns:
+        True upon successful creation.
+    """
+    clean_id = validate_business_id(business_id)
+    business_dir = (BUSINESS_PACKS_DIR / clean_id).resolve()
+
+    if not business_dir.is_relative_to(BUSINESS_PACKS_DIR.resolve()):
+        raise InvalidBusinessIdError(f"Security violation: Business ID '{business_id}' escapes base directory.")
+
+    business_dir.mkdir(parents=True, exist_ok=True)
+
+    for filename, content in files.items():
+        clean_filename = validate_filename(filename)
+        target_file = (business_dir / clean_filename).resolve()
+        target_file.write_text(content, encoding="utf-8")
+
+    return True
