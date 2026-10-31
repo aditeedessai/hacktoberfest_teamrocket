@@ -8,8 +8,19 @@ from app.api.schemas import (
     ChatRequest,
     ChatResponse,
     UpdateFileRequest,
+    CreateBusinessRequest,
+    UserRegisterRequest,
+    UserLoginRequest,
+    UserResponse,
+    AuthTokenResponse,
 )
 from app.services.ai_service import generate_business_reply
+from app.services.user_service import (
+    register_user,
+    authenticate_user,
+    get_user_by_email,
+    list_all_users,
+)
 from app.services.pack_loader import (
     BusinessNotFoundError,
     InvalidBusinessIdError,
@@ -19,6 +30,7 @@ from app.services.pack_loader import (
     list_available_businesses,
     load_business_pack,
     update_business_pack_file,
+    create_business_pack,
 )
 
 router = APIRouter()
@@ -150,3 +162,130 @@ async def update_business_pack_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(exc),
         )
+
+
+@router.post(
+    "/businesses",
+    response_model=BusinessItem,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create New Business Pack",
+    tags=["Businesses"],
+)
+async def create_business_endpoint(request: CreateBusinessRequest) -> BusinessItem:
+    """Create a new business pack directory and write its Markdown knowledge files."""
+    try:
+        create_business_pack(
+            business_id=request.business_id,
+            files=request.files,
+        )
+        return BusinessItem(
+            business_id=request.business_id,
+            name=request.name,
+            category=request.category,
+            description=request.description or f"Markdown skill pack for {request.name}.",
+        )
+    except InvalidBusinessIdError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+
+
+# ============================================================================
+# USER & AUTHENTICATION ROUTES (Customers & Business Owners)
+# ============================================================================
+
+@router.post(
+    "/auth/register",
+    response_model=AuthTokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register New User Account",
+    tags=["Authentication"],
+)
+async def register_endpoint(request: UserRegisterRequest) -> AuthTokenResponse:
+    """Register a new customer or business owner account."""
+    try:
+        user_profile = register_user(
+            name=request.name,
+            email=request.email,
+            password=request.password,
+            role=request.role,
+            phone=request.phone or "",
+            business_id=request.business_id,
+        )
+        token = f"tok_{user_profile['id']}_{hash(request.email) & 0xffffff}"
+        return AuthTokenResponse(
+            status="success",
+            token=token,
+            user=UserResponse(**user_profile),
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/auth/login",
+    response_model=AuthTokenResponse,
+    summary="User Login",
+    tags=["Authentication"],
+)
+async def login_endpoint(request: UserLoginRequest) -> AuthTokenResponse:
+    """Authenticate customer or business owner credentials."""
+    user_profile = authenticate_user(
+        email=request.email,
+        password=request.password,
+    )
+    if not user_profile:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password.",
+        )
+
+    token = f"tok_{user_profile['id']}_{hash(request.email) & 0xffffff}"
+    return AuthTokenResponse(
+        status="success",
+        token=token,
+        user=UserResponse(**user_profile),
+    )
+
+
+@router.get(
+    "/auth/me",
+    response_model=UserResponse,
+    summary="Get Current User Profile",
+    tags=["Authentication"],
+)
+async def get_me_endpoint(email: str) -> UserResponse:
+    """Fetch current user profile by email."""
+    user_profile = get_user_by_email(email)
+    if not user_profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+    return UserResponse(**user_profile)
+
+
+@router.get(
+    "/users",
+    response_model=List[UserResponse],
+    summary="List Registered Users",
+    tags=["Authentication"],
+)
+async def list_users_endpoint() -> List[UserResponse]:
+    """Return all registered customer and merchant user accounts."""
+    return [UserResponse(**u) for u in list_all_users()]
+

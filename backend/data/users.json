@@ -1,0 +1,52 @@
+{
+  "customer@email.com": {
+    "id": "usr_customer_demo",
+    "name": "Jane Customer",
+    "email": "customer@email.com",
+    "phone": "+1 (555) 019-2834",
+    "role": "customer",
+    "business_id": null,
+    "password_hash": "8ea0a139545f81b0c4be5560498bf22c3f9a9df0f9b768def4bc4948b853c02c",
+    "salt": "caa2b00dd6dffe5a452cb071f527f362"
+  },
+  "owner@business.demo": {
+    "id": "usr_bakery_owner",
+    "name": "Alice Baker",
+    "email": "owner@business.demo",
+    "phone": "+1 (555) 234-5678",
+    "role": "business_owner",
+    "business_id": "sweet-home-kitchen",
+    "password_hash": "973d1d06d982ee3aaf07b8054bbf1de2208a805b3af1582331a91cc1e5b65a6f",
+    "salt": "446867a5e5499b547f4649f1ed019687"
+  },
+  "elite-properties@openbusiness.demo": {
+    "id": "usr_re_owner",
+    "name": "David Broker",
+    "email": "elite-properties@openbusiness.demo",
+    "phone": "+1 (555) 876-5432",
+    "role": "business_owner",
+    "business_id": "elite-properties",
+    "password_hash": "381adddf45419f75b835bfb4757b686afba1b1a9f09ea0a82682174c0573d432",
+    "salt": "51fbbb1525fd52617a186396cfc10a8f"
+  },
+  "judge@hackathon.org": {
+    "id": "usr_c47f40cfc5da",
+    "name": "Judge Evaluator",
+    "email": "judge@hackathon.org",
+    "phone": "+1 555 999 8888",
+    "role": "customer",
+    "business_id": null,
+    "password_hash": "58906b2166bb99be56389682a6f152cffa869d0bacf00058ea90cb341a78b3d3",
+    "salt": "e7d7d43f4ed278e9a17d47a89d0fe18e"
+  },
+  "testuser_1793438193@example.com": {
+    "id": "usr_50b642de6406",
+    "name": "Test Runner",
+    "email": "testuser_1793438193@example.com",
+    "phone": "+1234567890",
+    "role": "customer",
+    "business_id": null,
+    "password_hash": "6bde10fadff15ecc5386164a771fa4af9cf57f8a6ed88d475b0dbe21e2263012",
+    "salt": "799e3da21318265f77146686769ae10d"
+  }
+}

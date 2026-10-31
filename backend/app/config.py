@@ -32,8 +32,8 @@ PORT = int(os.getenv("PORT", "8000"))
 
 # AI Model Inference Settings (Ollama / Open-weight models)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemma2:2b")
-OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "30.0"))
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemma4:e2b")
+OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "60.0"))
 
 # CORS Allowed Origins
 ALLOWED_ORIGINS = [
